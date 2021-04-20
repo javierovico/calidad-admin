@@ -4,11 +4,19 @@ import './index.css';
 import 'antd/dist/antd.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import axios from "axios";
+
+axios.defaults.baseURL = process.env.REACT_APP_DELIVERY_API_URL;
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+const token = localStorage.getItem('token');
+if (token) {
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+}
 
 ReactDOM.render(
-    <React.StrictMode>
+    <React.Fragment>
         <App/>
-    </React.StrictMode>,
+    </React.Fragment>,
     document.getElementById('root')
 );
 
