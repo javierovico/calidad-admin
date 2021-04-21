@@ -1,15 +1,17 @@
-import React from "react";
+import React, {useContext} from "react";
 import {Button} from 'antd';
 import {Formik, Form, Field} from "formik";
 import {AntInput} from "../../components/UI/Antd/AntdInputWithFormik";
-import axios from "axios";
-import User from "../../modelos/User";
 import openNotification from "../../components/UI/Antd/Notification";
+import { Redirect } from 'react-router-dom';
+import {AuthContext} from "../../context/AuthProvider";
 
 const required = value => (value ? undefined : 'Requerido');
 
 
 const SignIn = () => {
+    const { signIn, loggedIn } = useContext(AuthContext);
+    if (loggedIn) return <Redirect to={{ pathname: '/' }} />;
     return (
         <>
             <h2>Iniciar Sesion</h2>
@@ -19,15 +21,7 @@ const SignIn = () => {
                     password: '',
                 }}
                 onSubmit={(values, {setSubmitting, setErrors, ...a}) => {
-                    console.log(a)
-                    console.log('aldo, values', values, setSubmitting)
-                    axios({
-                        url: User.URL_LOGIN,
-                        method:'post',
-                        data:values
-                    }).then(({data})=>{
-
-                    }).catch(error=> {
+                    signIn(values).catch(error=> {
                         openNotification(error)
                         if(error?.response?.data?.errors){
                             setErrors(error.response.data.errors)

@@ -1,63 +1,85 @@
-import {BrowserRouter} from 'react-router-dom';
-import AuthProvider from "./context/AuthProvider";
-import Routes from './router';
-import React, {useState} from "react";
+import {Link} from 'react-router-dom';
+import Routes, {routes} from './router';
+import React, {useContext} from "react";
+//router
+import {useLocation} from 'react-router-dom';
+import {AiFillCaretDown} from 'react-icons/ai';
+
 // zona de menus
 import './App.css'
-import { Layout, Menu, Breadcrumb } from 'antd';
-import {AiFillMail,AiOutlineBorderlessTable} from 'react-icons/ai'
+import {Dropdown,Layout, Menu, Breadcrumb} from 'antd';
+import {Row,Col} from "antd";
+import {AuthContext} from "./context/AuthProvider";
+import {parseParams,setParams} from "./utils/Utils";
+// import {AiFillMail,AiOutlineBorderlessTable} from 'react-icons/ai'
 const { SubMenu } = Menu;
-const { Header, Content, Sider, Footer} = Layout;
+const {Header, Content, Footer} = Layout;
 
 
 
 function App() {
-    // const current = 'mail'
-    // const handleClick = ()=>{}
-    const [collapsed,setCollapsed] = useState(true)
+    const location = useLocation();
+    const {datosUser} = useContext(AuthContext);
+    const {empresas} = datosUser
+    const {search,pathname} = location
+    const menus = routes
+    console.log(location)
+    const menuEmpresa = (
+        <Menu>
+            {empresas.map(e=>
+                <Menu.Item key={e.idDelivery}>
+                    <Link to={{pathname,search:setParams({...parseParams(search),empresa_id:e.idDelivery,sucursal_id:null})}}>
+                        {e.clienteDeliv}
+                    </Link>
+                </Menu.Item>
+            )}
+        </Menu>
+    );
     return (
-        <BrowserRouter>
-            <AuthProvider>
-                <Layout style={{ minHeight: '100vh' }}>
-                    <Sider breakpoint="lg" collapsedWidth="0" collapsible collapsed={collapsed} onCollapse={setCollapsed}>
-                        <div className="logo" />
-                        <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
-                            <Menu.Item key="1" icon={<AiFillMail />}>
-                                Option 1
-                            </Menu.Item>
-                            <Menu.Item key="2" icon={<AiFillMail />}>
-                                Option 2
-                            </Menu.Item>
-                            <SubMenu key="sub1" icon={<AiOutlineBorderlessTable />} title="User">
-                                <Menu.Item key="3">Tom</Menu.Item>
-                                <Menu.Item key="4">Bill</Menu.Item>
-                                <Menu.Item key="5">Alex</Menu.Item>
-                            </SubMenu>
-                            <SubMenu key="sub2" icon={<AiOutlineBorderlessTable />} title="Team">
-                                <Menu.Item key="6">Team 1</Menu.Item>
-                                <Menu.Item key="8">Team 2</Menu.Item>
-                            </SubMenu>
-                            <Menu.Item key="9" icon={<AiOutlineBorderlessTable />}>
-                                Files
-                            </Menu.Item>
+        <Layout className="layout">
+            <Header>
+                <div className="logo"/>
+                <Row justify="space-between">
+                    <Col span={20}>
+                        <Menu
+                            theme="dark"
+                            mode="horizontal"
+                            selectedKeys={[pathname]}
+                        >
+                            {menus.map(m =>
+                                m.hijos?.length ?
+                                    <SubMenu key={m.nombre} title={m.nombre}>
+                                        {m.hijos.map(h=>
+                                            <Menu.Item key={m.link+h.link}><Link to={{pathname:m.link + h.link, search}}>{h.nombre}</Link></Menu.Item>
+                                        )}
+                                    </SubMenu> :
+                                    <Menu.Item key={m.link}><Link to={m.link}>{m.nombre}</Link></Menu.Item>
+                            )}
                         </Menu>
-                    </Sider>
-                    <Layout className="site-layout">
-                        <Header className="site-layout-background" style={{ padding: 0 }} />
-                        <Content style={{ margin: '0 16px' }}>
-                            <Breadcrumb style={{ margin: '16px 0' }}>
-                                <Breadcrumb.Item>User</Breadcrumb.Item>
-                                <Breadcrumb.Item>Bill</Breadcrumb.Item>
-                            </Breadcrumb>
-                            <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
-                                <Routes/>
-                            </div>
-                        </Content>
-                        <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
-                    </Layout>
-                </Layout>
-            </AuthProvider>
-        </BrowserRouter>
+                    </Col>
+                    <Col span={4}>
+                        <Dropdown overlay={menuEmpresa} trigger={['click']}>
+                            <a href={'no'} className="ant-dropdown-link" onClick={e => e.preventDefault()} style={{float:'right'}}>
+                                Empresas <AiFillCaretDown />
+                            </a>
+                        </Dropdown>
+                    </Col>
+                </Row>
+            </Header>
+            <Content style={{padding: '0 50px'}}>
+                <Breadcrumb style={{margin: '16px 0'}}>
+                    <Breadcrumb.Item>Home</Breadcrumb.Item>
+                    <Breadcrumb.Item>List</Breadcrumb.Item>
+                    <Breadcrumb.Item>App</Breadcrumb.Item>
+                </Breadcrumb>
+                <div className="site-layout-content">
+                    <Routes/>
+                </div>
+            </Content>
+            <Footer style={{textAlign: 'center'}}>
+                Ant Design ©2018 Created by Ant UED
+            </Footer>
+        </Layout>
     );
 }
 

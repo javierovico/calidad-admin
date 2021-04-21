@@ -1,6 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import User from '../modelos/User';
+import RolApi from "../modelos/Acceso/RolApi";
+import DatosUser from "../modelos/DatosUser";
 
 export const AuthContext = React.createContext();
 
@@ -42,8 +44,18 @@ const getToken = () => {
 const AuthProvider = props => {
     const [loggedIn, setLoggedIn] = useState(isValidToken());
     // const [loggedOut, setLoggedOut] = useState(true);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(new User());
     const [token, setToken] = useState(getToken);
+    const [datosUser,setDatosUser] = useState(new DatosUser())
+
+    /** Establece el token en el axio*/
+    useEffect(()=>{
+        if(token){
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+        }else{
+            axios.defaults.headers.common['Authorization'] = '';
+        }
+    },[token])
 
     const signIn = params => {
         return new Promise((resolve, reject) => {
@@ -55,18 +67,12 @@ const AuthProvider = props => {
             axios({
                 url: User.URL_LOGIN,
                 method: 'POST',
-                data: {
-                    email: params.email,
-                    password: params.password,
-                    remember_me: params.rememberMe,
-                },
+                data: params,
             })
                 .then(({data}) => {
-                    const {user, access_token, expires_at} = data;
-                    setUser(new User(user));
+                    const {access_token} = data;
                     setToken(access_token);
                     addItem('token', access_token);
-                    addItem('expores_at', expires_at);
                     setLoggedIn(true);
                 })
                 .catch(error => {
@@ -107,6 +113,28 @@ const AuthProvider = props => {
         setLoggedIn(false);
     };
 
+    /** Si se deslogguea o se loguea, acutliza los datos del usuario logueado */
+    useEffect(()=>{
+        if(loggedIn){
+            axios({
+                url: User.URL_DESCARGA
+            }).then(({data})=>{
+                setUser(new User(data))
+            }).catch(e=>{
+                /** Fallo en el logueo*/
+                logOut()
+            })
+            axios({
+                url: DatosUser.URL_DESCARGA
+            }).then(({data})=>{
+                setDatosUser(new DatosUser(data))
+            }).catch(e=>{
+                /** Fallo en el logueo*/
+                logOut()
+            })
+        }
+    },[loggedIn])
+
     return (
         <AuthContext.Provider
             value={{
@@ -119,6 +147,7 @@ const AuthProvider = props => {
                 tokenAuth,
                 user,
                 token,
+                datosUser,
             }}
         >
             <>{props.children}</>

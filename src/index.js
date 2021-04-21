@@ -5,17 +5,23 @@ import 'antd/dist/antd.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import axios from "axios";
+import AuthProvider from "./context/AuthProvider";
+import {BrowserRouter} from "react-router-dom";
 
 axios.defaults.baseURL = process.env.REACT_APP_DELIVERY_API_URL;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
-const token = localStorage.getItem('token');
-if (token) {
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-}
+// const token = localStorage.getItem('token');
+// if (token) {
+//     axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+// }
 
 ReactDOM.render(
     <React.Fragment>
-        <App/>
+        <AuthProvider>
+            <BrowserRouter basename='/'>
+                <App/>
+            </BrowserRouter>
+        </AuthProvider>
     </React.Fragment>,
     document.getElementById('root')
 );
