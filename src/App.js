@@ -11,6 +11,7 @@ import {Dropdown,Layout, Menu, Breadcrumb} from 'antd';
 import {Row,Col} from "antd";
 import {AuthContext} from "./context/AuthProvider";
 import {parseParams,setParams} from "./utils/Utils";
+import EllipsisText from "react-ellipsis-text";
 // import {AiFillMail,AiOutlineBorderlessTable} from 'react-icons/ai'
 const { SubMenu } = Menu;
 const {Header, Content, Footer} = Layout;
@@ -19,7 +20,7 @@ const {Header, Content, Footer} = Layout;
 
 function App() {
     const location = useLocation();
-    const {datosUser} = useContext(AuthContext);
+    const {datosUser,empresaSeleccionada, sucursalesSeleccionables, sucursalSeleccionada} = useContext(AuthContext);
     const {empresas} = datosUser
     const {search,pathname} = location
     const menus = routes
@@ -35,12 +36,23 @@ function App() {
             )}
         </Menu>
     );
+    const menuSucursal = (
+        <Menu>
+            {sucursalesSeleccionables.map(e=>
+                <Menu.Item key={e.IdSucursal}>
+                    <Link to={{pathname,search:setParams({...parseParams(search),sucursal_id:e.IdSucursal})}}>
+                        {e.sucursal}
+                    </Link>
+                </Menu.Item>
+            )}
+        </Menu>
+    );
     return (
         <Layout className="layout">
             <Header>
                 <div className="logo"/>
                 <Row justify="space-between">
-                    <Col span={20}>
+                    <Col span={16}>
                         <Menu
                             theme="dark"
                             mode="horizontal"
@@ -57,10 +69,16 @@ function App() {
                             )}
                         </Menu>
                     </Col>
-                    <Col span={4}>
+                    <Col span={8}>
+                        {sucursalesSeleccionables.length > 0 && <Dropdown overlay={menuSucursal} trigger={['click']}>
+                            <a href={'no'} className="ant-dropdown-link" onClick={e => e.preventDefault()}
+                               style={{float: 'right'}}>
+                                {sucursalSeleccionada ? <EllipsisText text={sucursalSeleccionada.sucursal.replace(/^sucursal /i,'')} length={15} /> : 'Sucursales'} <AiFillCaretDown/>
+                            </a>
+                        </Dropdown>}
                         <Dropdown overlay={menuEmpresa} trigger={['click']}>
                             <a href={'no'} className="ant-dropdown-link" onClick={e => e.preventDefault()} style={{float:'right'}}>
-                                Empresas <AiFillCaretDown />
+                                {empresaSeleccionada?<EllipsisText text={empresaSeleccionada.clienteDeliv} length={15} />:'Empresas'} <AiFillCaretDown />
                             </a>
                         </Dropdown>
                     </Col>

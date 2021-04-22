@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import axios from 'axios';
 import User from '../modelos/User';
-import RolApi from "../modelos/Acceso/RolApi";
 import DatosUser from "../modelos/DatosUser";
+import {useQueryParams} from "../hook/useQueryParams";
 
 export const AuthContext = React.createContext();
 
@@ -42,11 +42,20 @@ const getToken = () => {
 }
 
 const AuthProvider = props => {
+    const {empresa_id, sucursal_id} = useQueryParams()
     const [loggedIn, setLoggedIn] = useState(isValidToken());
-    // const [loggedOut, setLoggedOut] = useState(true);
     const [user, setUser] = useState(new User());
     const [token, setToken] = useState(getToken);
-    const [datosUser,setDatosUser] = useState(new DatosUser())
+    const [datosUser,setDatosUser] = useState(new DatosUser());
+    const empresaSeleccionada = useMemo(()=>{
+        return datosUser?.empresas?.find(e=>e.idDelivery === empresa_id) || null
+    },[datosUser?.empresas, empresa_id]);
+    const sucursalesSeleccionables = useMemo(()=>{
+        return datosUser?.sucursales?.filter(s=>s.idDelivery === empresa_id) || []
+    },[datosUser?.sucursales, empresa_id]);
+    const sucursalSeleccionada = useMemo(()=>{
+        return datosUser?.sucursales?.find(e=>e.IdSucursal === sucursal_id) || null
+    },[datosUser?.sucursales, sucursal_id]);
 
     /** Establece el token en el axio*/
     useEffect(()=>{
@@ -148,6 +157,9 @@ const AuthProvider = props => {
                 user,
                 token,
                 datosUser,
+                empresaSeleccionada,
+                sucursalesSeleccionables,
+                sucursalSeleccionada,
             }}
         >
             <>{props.children}</>
