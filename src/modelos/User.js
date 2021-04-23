@@ -7,16 +7,11 @@ export default class User extends ClaseModelV2 {
 
     constructor(e, aceptaExtra = false) {
         super(e, [
-            'IdPersona',
-            'IdRol',
-            'activo',
-            'agente_pbx',
-            'imagen',
-            'movil',
-            'numero_agente',
-            {key: 'roles', array: true, type:RolApi},
-            'email',
-        ], 'IdPersona', User.URL_DESCARGA, aceptaExtra);
+            'created_at',
+            'id',
+            'updated_at',
+            'user',
+        ], 'id', User.URL_DESCARGA, aceptaExtra);
     }
 
     static fromSource(e) {

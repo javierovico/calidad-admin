@@ -24,7 +24,7 @@ function App() {
     const {empresas} = datosUser
     const {search,pathname} = location
     const menus = routes
-    console.log(location)
+    // console.log(location)
     const menuEmpresa = (
         <Menu>
             {empresas.map(e=>

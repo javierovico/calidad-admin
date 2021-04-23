@@ -44,7 +44,7 @@ const getToken = () => {
 const AuthProvider = props => {
     const {empresa_id, sucursal_id} = useQueryParams()
     const [loggedIn, setLoggedIn] = useState(isValidToken());
-    const [user, setUser] = useState(new User());
+    const [user, setUser] = useState(null);
     const [token, setToken] = useState(getToken);
     const [datosUser,setDatosUser] = useState(new DatosUser());
     const empresaSeleccionada = useMemo(()=>{
@@ -90,11 +90,11 @@ const AuthProvider = props => {
         });
     };
     const signUp = params => {
-        console.log(params, 'sign up form Props');
-        setUser(fakeUserData);
-        setToken(fakeToken);
-        addItem('token', fakeToken);
-        setLoggedIn(true);
+        // console.log(params, 'sign up form Props');
+        // setUser(fakeUserData);
+        // setToken(fakeToken);
+        // addItem('token', fakeToken);
+        // setLoggedIn(true);
     };
 
     /**
@@ -102,10 +102,10 @@ const AuthProvider = props => {
      *
      */
     const tokenAuth = (token, user = {}) => {
-        setUser(user);
-        setToken(token);
-        addItem('token', token);
-        setLoggedIn(true);
+        // setUser(user);
+        // setToken(token);
+        // addItem('token', token);
+        // setLoggedIn(true);
     };
 
     const forgetPass = params => {
@@ -126,21 +126,21 @@ const AuthProvider = props => {
     useEffect(()=>{
         if(loggedIn){
             axios({
-                url: User.URL_DESCARGA
+                url: User.URL_DESCARGA + '?XDEBUG_SESSION_START=PHPSTORM'
             }).then(({data})=>{
                 setUser(new User(data))
             }).catch(e=>{
                 /** Fallo en el logueo*/
                 logOut()
             })
-            axios({
-                url: DatosUser.URL_DESCARGA
-            }).then(({data})=>{
-                setDatosUser(new DatosUser(data))
-            }).catch(e=>{
-                /** Fallo en el logueo*/
-                logOut()
-            })
+            // axios({
+            //     url: DatosUser.URL_DESCARGA
+            // }).then(({data})=>{
+            //     setDatosUser(new DatosUser(data))
+            // }).catch(e=>{
+            //     /** Fallo en el logueo*/
+            //     logOut()
+            // })
         }
     },[loggedIn])
 

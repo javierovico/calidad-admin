@@ -25,6 +25,19 @@ export const routes = [
         }),
     },
     {
+        nombre: 'Contactos',
+        link: '/contactos',
+        hijos:[
+            {
+                nombre:'Listar Contactos',
+                link:'/listar',
+                component: loadable(() => import('./container/Contacto/Listar'), {
+                    fallback: <Loading/>
+                }),
+            }
+        ]
+    },
+    {
         nombre: 'Configuracion',
         link: '/configuracion',
         permiso:null,

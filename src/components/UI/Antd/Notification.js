@@ -6,8 +6,12 @@ const openNotification = (e,duracion = 30) => {
     let titulo
     if(e?.titulo){
         titulo = e.titulo
-    }if(e?.response?.data?.message){
+    }else if(e?.response?.data?.message){
         titulo = e.response.data.message
+    }else if(e?.response?.data?.exception){
+        titulo = e.response.data.exception
+    }else{
+        titulo = 'Error'
     }
     let contenido
     if(e?.mensaje){
@@ -32,6 +36,8 @@ const openNotification = (e,duracion = 30) => {
                 </List.Item>
             )}
         />
+    }else{
+        contenido = 'Ocurrio un error'
     }
     notification.open({
         message: <b>{titulo}</b>,
