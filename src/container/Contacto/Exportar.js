@@ -1,13 +1,13 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
 import { setStateToUrl, useQueryParams} from "../../hook/useQueryParams";
-import {Input,Col, Divider, Modal, Row, Table, TreeSelect} from 'antd';
+import {Upload, message, Button,Col, Divider, Modal, Row, Table, TreeSelect} from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import axios from "axios";
 import Contacto from "../../modelos/FuenteUnicaContactos/Contacto";
 import openNotification from "../../components/UI/Antd/Notification";
 import {AuthContext} from "../../context/AuthProvider";
 import TipoDocumento from "../../modelos/FuenteUnicaContactos/TipoDocumento";
 
-const {Search} = Input;
 
 function useListarParametros(history){
     const {analizarError} = useContext(AuthContext)
@@ -127,7 +127,7 @@ const columnasTelefono = [
     },
 ]
 
-export default function Listar({history}) {
+export default function Exportar({history}) {
     const {
         // tipoDocs,
         tipoDocsArbol,
@@ -143,6 +143,8 @@ export default function Listar({history}) {
         listaTipoDoc,
         documento,
     } = useListarParametros(history);
+
+    const [archivos,setArchivos] = useState([]);
 
     const columns = [
         {
@@ -201,15 +203,24 @@ export default function Listar({history}) {
         },
     };
     return <>
-        <Divider>Filtrado</Divider>
+        <Divider>Tipo de Documento</Divider>
         <Row justify="space-around">
             <Col span={10}>
-                <TreeSelect {...tProps} />
+                <Upload
+                    onRemove={file=>{
+                        setArchivos([])
+                    }}
+                    beforeUpload={file=>{
+                        setArchivos([file])
+                        return false;
+                    }}
+                    fileList={archivos}
+                >
+                    {archivos.length === 0 && <Button icon={<UploadOutlined/>}>Click to Upload</Button>}
+                </Upload>
             </Col>
             <Col span={10}>
-                <Search allowClear defaultValue={documento} placeholder="Documento"  enterButton onSearch={(value)=>{
-                    handleChangeGroup({documento:value,page:1})
-                }} />
+                <TreeSelect {...tProps} />
             </Col>
         </Row>
         <Divider>Resultados</Divider>

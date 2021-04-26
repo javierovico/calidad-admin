@@ -34,106 +34,14 @@ export const routes = [
                 component: loadable(() => import('./container/Contacto/Listar'), {
                     fallback: <Loading/>
                 }),
-            }
-        ]
-    },
-    {
-        nombre: 'Configuracion',
-        link: '/configuracion',
-        permiso:null,
-        nivel:null,
-        tipo: 'dropdown',
-        hijos: [
+            },
             {
-                nombre:'Empresas',
-                link:'/empresas',
-                permiso:'empresa_listar',
-                nivel:'general',        //'general','empresa','sucursal','any' => le dice que tiene que tener ese acceso en modo de general
-                component: loadable(() => import('./container/Configuracion/Empresas'), {
+                nombre:'Extraer Contactos Excel',
+                link:'/extraer-excel',
+                component: loadable(() => import('./container/Contacto/Exportar'), {
                     fallback: <Loading/>
                 }),
-            },
-            {
-                nombre:'Personales',
-                link:'/personales',
-                permiso:'personal_listar',
-                nivel:'general',        //'general','empresa','sucursal','any' => le dice que tiene que tener ese acceso en modo de general
-            },
-            {
-                nombre:'Roles',
-                link:'/roles',
-                permiso:'rol_listar',
-                nivel:'any',        //'general','empresa','sucursal','any' => le dice que tiene que tener ese acceso en modo de general
-            },
-            {
-                nombre:'Caja de Lista',
-                link:'/caja-lista',
-                permiso:'caja_lista_listar',
-                nivel:'empresa',
-            },
-        ]
-    },
-    {
-        nombre: 'Usuarios',
-        link:'/usuarios',
-        permiso:null,
-        nivel:null,
-        tipo: 'dropdown',
-        hijos: [
-            {
-                nombre:'Usuarios',
-                link:'/usuarios',
-                permiso:'usuario_listar',
-                nivel:'any',
-            },
-        ]
-    },
-    {
-        nombre: 'Clientes',
-        link:'/clientes',
-        permiso:null,
-        nivel:null,
-        tipo: 'dropdown',
-        hijos: [
-            {
-                nombre:'Clientes',
-                link:'/clientes',
-                permiso:'cliente_listar',
-                nivel:'empresa',
-            },
-        ]
-    },
-    {
-        nombre: 'Productos',
-        link:'/productos',
-        permiso:null,
-        nivel:null,
-        tipo: 'dropdown',
-        hijos: [
-            {
-                nombre:'Categorias',
-                link:'/categorias',
-                permiso:'categoria_listar',
-                nivel:'sucursal',
-            },
-            {
-                nombre:'Productos',
-                link:'/productos',
-                permiso:'producto_listar',
-                nivel:'empresa',
-            },
-            {
-                nombre:'Jedisoft',
-                link:'/jedisoft',
-                permiso:'producto_listar',
-                nivel:'empresa',
-            },
-            {
-                nombre:'Importar desde Excel',
-                link:'/import-excel',
-                permiso:'producto_modificar',
-                nivel:'empresa',
-            },
+            }
         ]
     },
 ];

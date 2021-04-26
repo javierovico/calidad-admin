@@ -26,9 +26,21 @@ export function getStateFromUrl(location) {
             switch (key) {
                 case 'page':
                 case 'perPage':
+                case 'telefonosPersonaId':
                     if (urlData[key]) {
                         state[key] = Number(urlData[key]);
                     }
+                    break;
+                case 'documento':
+                    if (urlData[key]) {
+                        state[key] = urlData[key];
+                    }
+                    break;
+                case 'listaTipoDoc':
+                    state[key] =
+                        urlData[key] && urlData[key] !== 'null'
+                            ? urlData[key].split(',')
+                            : [];
                     break;
                 default:
                     state[key] = urlData[key];
@@ -44,7 +56,16 @@ function reducer(state, action) {
     switch (action.type) {
         case 'page':
         case 'perPage':
+        case 'telefonosPersonaId':
+        case 'documento':
             return {...state,[action.type]:action.payload}
+        case 'listaTipoDoc':
+            return ((state[action.type].length !== action.payload.length) || (state[action.type].some(i => !action.payload.find(i2 => i2 === i))))
+                ? {
+                    ...state,
+                    [action.type]: action.payload
+                } :
+                state
         default:
             throw new Error('anarako')
     }
@@ -56,6 +77,9 @@ export const useQueryParams = () => {
     const [state, dispatch] = useReducer(reducer, {
         page: parseInt(stateRaw.page) || 1,
         perPage: parseInt(stateRaw.perPage) || 10,
+        telefonosPersonaId: parseInt(stateRaw.telefonosPersonaId) || 0,
+        listaTipoDoc: stateRaw.listaTipoDoc || [],
+        documento: stateRaw.documento || '',
     });
     /** escuchar cambios en departamentos */
     useEffect(() => {
@@ -64,6 +88,15 @@ export const useQueryParams = () => {
     useEffect(() => {
         dispatch({type: 'perPage', payload: stateRaw.perPage || 10})
     }, [stateRaw.perPage])
+    useEffect(() => {
+        dispatch({type: 'telefonosPersonaId', payload: stateRaw.telefonosPersonaId || 0})
+    }, [stateRaw.telefonosPersonaId])
+    useEffect(() => {
+        dispatch({type: 'listaTipoDoc', payload: stateRaw.listaTipoDoc || []})
+    }, [stateRaw.listaTipoDoc])
+    useEffect(() => {
+        dispatch({type: 'documento', payload: stateRaw.documento || ''})
+    }, [stateRaw.documento])
     return state
 }
 
@@ -78,6 +111,16 @@ export function setStateToUrl(state) {
                     break;
                 case 'perPage':
                     urlData[key] = state[key] !== 10? state[key] : null;
+                    break;
+                case 'telefonosPersonaId':
+                    urlData[key] = state[key]? state[key] : null;
+                    break;
+                case 'listaTipoDoc':
+                    urlData[key] =
+                        state[key] && state[key].length ? state[key].join(',') : null;
+                    break;
+                case 'documento':
+                    urlData[key] = state[key]? state[key] : null;
                     break;
                 default:
                     urlData[key] = state[key];

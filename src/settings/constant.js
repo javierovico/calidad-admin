@@ -30,3 +30,9 @@ export const CHANGE_PASSWORD_PAGE = '/change-password';
 export const FORGET_PASSWORD_PAGE = '/forget-password';
 // **************** ROUTE CONSTANT END **************************
 export const URL_PANO_PREV = '/pano-prev'
+
+
+/*******************************************************
+ * Codigos de errores *
+ *******************************************************/
+export const ERROR_CODE_NO_AUTENTICADO = 'tkn_vnc';

@@ -20,31 +20,19 @@ const {Header, Content, Footer} = Layout;
 
 function App() {
     const location = useLocation();
-    const {datosUser,empresaSeleccionada, sucursalesSeleccionables, sucursalSeleccionada} = useContext(AuthContext);
-    const {empresas} = datosUser
     const {search,pathname} = location
     const menus = routes
-    // console.log(location)
-    const menuEmpresa = (
+    const {user, loggedIn, logOut} = useContext(AuthContext)
+    const menuUsuario = (
         <Menu>
-            {empresas.map(e=>
-                <Menu.Item key={e.idDelivery}>
-                    <Link to={{pathname,search:setParams({...parseParams(search),empresa_id:e.idDelivery,sucursal_id:null})}}>
-                        {e.clienteDeliv}
-                    </Link>
-                </Menu.Item>
-            )}
-        </Menu>
-    );
-    const menuSucursal = (
-        <Menu>
-            {sucursalesSeleccionables.map(e=>
-                <Menu.Item key={e.IdSucursal}>
-                    <Link to={{pathname,search:setParams({...parseParams(search),sucursal_id:e.IdSucursal})}}>
-                        {e.sucursal}
-                    </Link>
-                </Menu.Item>
-            )}
+            <Menu.Item key='cerrar-sesion'>
+                { loggedIn && <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com" onClick={(e)=>{
+                    e.preventDefault()
+                    logOut()
+                }}>
+                    Cerrar Sesion
+                </a>}
+            </Menu.Item>
         </Menu>
     );
     return (
@@ -70,17 +58,11 @@ function App() {
                         </Menu>
                     </Col>
                     <Col span={8}>
-                        {sucursalesSeleccionables.length > 0 && <Dropdown overlay={menuSucursal} trigger={['click']}>
-                            <a href={'no'} className="ant-dropdown-link" onClick={e => e.preventDefault()}
-                               style={{float: 'right'}}>
-                                {sucursalSeleccionada ? <EllipsisText text={sucursalSeleccionada.sucursal.replace(/^sucursal /i,'')} length={15} /> : 'Sucursales'} <AiFillCaretDown/>
+                        {loggedIn && user && <Dropdown overlay={menuUsuario}>
+                            <a href={'no'} className="ant-dropdown-link" onClick={e => e.preventDefault()} style={{float:'right'}}>
+                                {user.user}<AiFillCaretDown />
                             </a>
                         </Dropdown>}
-                        <Dropdown overlay={menuEmpresa} trigger={['click']}>
-                            <a href={'no'} className="ant-dropdown-link" onClick={e => e.preventDefault()} style={{float:'right'}}>
-                                {empresaSeleccionada?<EllipsisText text={empresaSeleccionada.clienteDeliv} length={15} />:'Empresas'} <AiFillCaretDown />
-                            </a>
-                        </Dropdown>
                     </Col>
                 </Row>
             </Header>

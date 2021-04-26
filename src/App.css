@@ -54,10 +54,10 @@
 }
 
 /*Para que el dropdown de antd no sea tan infinito*/
-.ant-dropdown-menu {
-    height: 500px;
-    overflow: auto
-}
+/*.ant-dropdown-menu {*/
+/*    height: 500px;*/
+/*    overflow: auto*/
+/*}*/
 
 
 /*.ant-layout .layout { display: table; }*/
