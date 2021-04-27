@@ -6,6 +6,7 @@ export default class Contacto extends ClaseModelV2{
 
     static PRIMARY_KEY = 'id'
     static URL_DESCARGA = `/contacto`
+    static URL_COGER_MASIVO = Contacto.URL_DESCARGA + '/coger-masivo';
 
     constructor(e) {
         super(e, [

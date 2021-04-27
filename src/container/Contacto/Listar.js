@@ -219,6 +219,7 @@ export default function Listar({history}) {
             rowKey="id"
             loading={loading}
             pagination={{
+                showQuickJumper:true,
                 showSizeChanger:true,
                 pageSize:perPage,
                 current:page,
