@@ -215,7 +215,7 @@ export default function Exportar() {
                     }}
                     fileList={archivos}
                 >
-                    {archivos.length === 0 && <Button icon={<UploadOutlined/>}>Click to Upload</Button>}
+                    {archivos.length === 0 && <Button icon={<UploadOutlined/>}>Click Para seleccionar</Button>}
                 </Upload>
             </Col>
             <Col span={5}>

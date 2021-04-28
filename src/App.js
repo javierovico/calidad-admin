@@ -74,7 +74,7 @@ function App() {
                 </div>
             </Content>
             <Footer style={{textAlign: 'center'}}>
-                Ant Design ©2018 Created by Ant UED
+                Fuente Unica de Contactos ©2021 Created by Skytel
             </Footer>
         </Layout>
     );
