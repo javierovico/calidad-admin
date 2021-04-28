@@ -43,7 +43,7 @@ function useListarParametros(history){
         return ()=>{
             cancelar = true;
         }
-    },[page,perPage,listaTipoDoc,documento])
+    },[page,perPage,listaTipoDoc,documento,analizarError])
     const [personaModal,setPersonaModal] = useState(null)
     const [personalLoading,setPersonalLoading] = useState(false);
     useEffect(()=>{
@@ -66,7 +66,7 @@ function useListarParametros(history){
             }
         }).finally(()=>setPersonalLoading(false))
         return () => cancelar = true;
-    },[telefonosPersonaId])
+    },[telefonosPersonaId,analizarError])
     /** Zona para hacer un getter de los tipos de cedulas por pais **/
     const [tipoDocs,setTipoDocs] = useState([])
     useState(()=>{
@@ -179,8 +179,8 @@ export default function Listar({history}) {
             title: 'Accion',
             dataIndex: '',
             key: 'accion',
-            render: (persona) => <a onClick={()=>{
-                console.log(persona)
+            render: (persona) => <a href={'?#'} onClick={(e)=>{
+                e.preventDefault()
                 handleChangeGroup({telefonosPersonaId:persona.id})
             }}>
                 Telefonos

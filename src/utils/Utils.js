@@ -40,46 +40,8 @@ export function getRandomColor() {
     return color;
 }
 
-export function addQuery(router,query = {},path = null) {
-    let nuevaRuta = {
-        path: path?path:router.path.toString(),
-        query: query.add?query.add:{}
-    }
-    for (let key in router.query) {
-        let existe = false
-        if(query.add){
-            for (let key2 in query.add) {
-                if(key == key2){
-                    existe = true
-                }
-            }
-        }
-        if(!existe && (!(query.rem) || query.rem.every(ele=>ele!==key))){
-            nuevaRuta.query[key] = router.query[key]
-        }
-    }
-    return nuevaRuta
-}
 
 
-export function rutearV2({query = {},path, remplazar = false}){
-    console.error('no se puede rutear con vue')
-    // console.log('s')
-    // const router = Router.currentRoute
-    // /** La nueva ruta toma los parametros originales, como si se tratase de una copia para no tener una excepcion */
-    // let nuevaRuta = {
-    //     path: path?path:router.path.toString(),
-    //     query: JSON.parse(JSON.stringify(router.query))
-    // }
-    // for(let key in query){
-    //     nuevaRuta.query[key] = query[key]
-    // }
-    // if(remplazar){
-    //     Router.replace(nuevaRuta).catch((e)=>{})
-    // }else{
-    //     Router.push(nuevaRuta).catch((e)=>{})
-    // }
-}
 
 export function dateFormateado(d){
     d = new Date(d)
@@ -100,16 +62,6 @@ export function intToHour(i) {
     return i<24?(''+((i<10)?('0'+i):(''+i)) + ':00:00'):'23:59:59'
 }
 
-export function imprimirError(toastAdmin,error){
-    console.error('no se puede rutear con vue')
-    throw 'no'
-    // toastAdmin.toast(`Error: ${error}`, {
-    //     variant: 'danger',
-    //     title: 'Delivery',
-    //     autoHideDelay: 5000,
-    //     appendToast: false
-    // })
-}
 
 export function vaciar(obj){
     obj.splice(0,obj.length)
@@ -251,131 +203,9 @@ export function descargarExcel(titulo, datos, conversionCrudo) {
             })
     })
 }
-function isFunction(functionToCheck) {
+export function isFunction(functionToCheck) {
     return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
 }
-//COMPUTED
-export function llenarQuery(params){
-    let salida = {}
-    for(let [key,value] of Object.entries(params)){
-        switch(value.type){
-            default:
-                Object.assign(salida,{['prop'+key.charAt(0).toUpperCase() + key.slice(1)]: function(){
-                    const prefijo = this.propPrefijoQuery?(this.propPrefijoQuery+ '_'):''
-                    if(!key){
-                        key = camelToSnake(key)
-                    }
-                    const result = this.$route.query[prefijo + key]
-                    if(!result){
-                        return value.default
-                    }else{
-                        switch(value.type){
-                            case 'number':
-                                return parseInt(result)
-                            case 'boolean':
-                                return (result === '1' || result === 'true')
-                            default:
-                                if(value.integer){
-                                    return parseInt(result)
-                                }
-                                return result
-                        }
-                    }
-                }})
-        }
-    }
-    return salida
-}
-
-//METHODS
-export function cambiarQuery(params){
-    let salida = {['loadQuery'] : function(){
-        for(let [key,value] of Object.entries(params)){
-            switch(value.type){
-                case 'modal':
-                    if(this['prop'+key.charAt(0).toUpperCase() + key.slice(1)]){
-                        this.$bvModal.show(value.id?value.id:key)
-                    }
-                    break;
-                default:
-                    this[key] = this['prop'+key.charAt(0).toUpperCase() + key.slice(1)]
-                    if(value.form){
-                        this['form'+key.charAt(0).toUpperCase() + key.slice(1)] = this['prop'+key.charAt(0).toUpperCase() + key.slice(1)]
-                    }
-                    break;
-            }
-        }
-    }}
-    Object.assign(salida,{['commitQuery'] : function(key){
-        this['set'+primeraLetraMayuscula(key)](this['form'+primeraLetraMayuscula(key)])
-    }})
-    for(let [key,value] of Object.entries(params)){
-        switch(value.type){
-            case 'modal':
-                Object.assign(salida,{['cerrar'+key.charAt(0).toUpperCase() + key.slice(1)]: function(){
-                    const prefijo = this.propPrefijoQuery?(this.propPrefijoQuery+ '_'):''
-                    const queryInsert = prefijo + key
-                    this.$router.push(addQuery(this.$route,{rem:[queryInsert]})).catch(()=>{})
-                }})
-                Object.assign(salida,{['abrir'+key.charAt(0).toUpperCase() + key.slice(1)]: function(id){
-                        const prefijo = this.propPrefijoQuery?(this.propPrefijoQuery+ '_'):''
-                        const queryInsert = prefijo + key
-                        this.$router.push(addQuery(this.$route,{add:{[queryInsert]:id}})).catch(()=>{})
-                    }})
-                break;
-            default:
-                Object.assign(salida,{['set'+key.charAt(0).toUpperCase() + key.slice(1)]: function(nuevo){
-                    const prefijo = this.propPrefijoQuery?(this.propPrefijoQuery+ '_'):''
-                    this[key] = nuevo
-                    if(!key){
-                        key = camelToSnake(key)
-                    }
-                    const queryInsert = prefijo + key
-                    if(nuevo !== null){
-                        this.$router.replace(addQuery(this.$route,{add:{[queryInsert]:nuevo}})).catch(()=>{})
-                    }else{
-                        this.$router.replace(addQuery(this.$route,{rem:[queryInsert]})).catch(()=>{})
-                    }
-                }})
-        }
-    }
-    return salida
-}
-//WATCH
-export function crearWatch(params){
-    let salida = {}
-    for(let [key,value] of Object.entries(params)){
-        switch (value.type){
-            case 'modal':
-                Object.assign(salida,{['prop'+key.charAt(0).toUpperCase() + key.slice(1)]: function(e){
-                    if(e){
-                        this.$bvModal.show(value.id?value.id:key)
-                    }else{
-                        this.$bvModal.hide(value.id?value.id:key)
-                    }
-                }})
-                break;
-            default:
-                Object.assign(salida,{[key]: function(p){
-                    this['set'+key.charAt(0).toUpperCase() + key.slice(1)](p)
-                }})
-        }
-    }
-    return salida
-}
-
-//DATA
-export function crearVariables(params){
-    let salida = {}
-    for(let [key,value] of Object.entries(params)){
-        Object.assign(salida,{[key]: value.default})
-        if(value.form){
-            Object.assign(salida,{['form'+key.charAt(0).toUpperCase() + key.slice(1)]: value.default})
-        }
-    }
-    return salida
-}
-
 export function camelToSnake(str){
     return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 }

@@ -10,9 +10,6 @@ import './App.css'
 import {Dropdown,Layout, Menu, Breadcrumb} from 'antd';
 import {Row,Col} from "antd";
 import {AuthContext} from "./context/AuthProvider";
-import {parseParams,setParams} from "./utils/Utils";
-import EllipsisText from "react-ellipsis-text";
-// import {AiFillMail,AiOutlineBorderlessTable} from 'react-icons/ai'
 const { SubMenu } = Menu;
 const {Header, Content, Footer} = Layout;
 

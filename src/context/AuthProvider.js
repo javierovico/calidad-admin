@@ -94,6 +94,8 @@ const AuthProvider = props => {
             case ERROR_CODE_NO_AUTENTICADO:
                 logOut()
                 break;
+            default:
+                break;
         }
     }
 

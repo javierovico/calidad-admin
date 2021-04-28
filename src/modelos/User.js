@@ -1,5 +1,4 @@
 import ClaseModelV2 from './ClaseModelV2';
-import RolApi from "./Acceso/RolApi";
 
 export default class User extends ClaseModelV2 {
     static URL_DESCARGA = `/auth/user`;

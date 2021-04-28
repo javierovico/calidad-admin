@@ -1,46 +1,18 @@
-import React, {useContext, useEffect, useMemo, useState} from "react";
-import { setStateToUrl, useQueryParams} from "../../hook/useQueryParams";
-import {Select,Upload, message, Button,Col, Divider, Modal, Row, Table, TreeSelect} from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import React, {useContext, useEffect, useState} from "react";
+import {Select,Upload, Button,Col, Divider, Row, Table} from 'antd';
+import {DownloadOutlined, UploadOutlined} from '@ant-design/icons';
 import axios from "axios";
 import Contacto from "../../modelos/FuenteUnicaContactos/Contacto";
 import openNotification from "../../components/UI/Antd/Notification";
 import {AuthContext} from "../../context/AuthProvider";
 import TipoDocumento from "../../modelos/FuenteUnicaContactos/TipoDocumento";
 import {dateFormateado} from "../../utils/Utils";
+import exportExcel from "../../utils/exportExcel";
 const Excel = require('exceljs')
 
 
-function useListarParametros(history){
+function useListarParametros(){
     const {analizarError} = useContext(AuthContext)
-    const query = useQueryParams()
-    const {page,perPage,telefonosPersonaId,listaTipoDoc,documento} = query
-    const [data,setData] = useState([]);
-    const [total,setTotal] = useState(1);
-    const [loading,setLoading] = useState(true);
-    const [personaModal,setPersonaModal] = useState(null)
-    const [personalLoading,setPersonalLoading] = useState(false);
-    useEffect(()=>{
-        let cancelar = false;
-        if(!telefonosPersonaId){
-            setPersonalLoading(false);
-            return () => cancelar = true;
-        }
-        setPersonalLoading(true);
-        axios({
-            url: Contacto.urlCargaFromId(telefonosPersonaId)
-        }).then(({data}) => {
-            if(!cancelar){
-                setPersonaModal(new Contacto(data.contacto))
-            }
-        }).catch(e=> {
-            if(!cancelar){
-                analizarError(e)
-                openNotification(e)
-            }
-        }).finally(()=>setPersonalLoading(false))
-        return () => cancelar = true;
-    },[telefonosPersonaId])
     /** Zona para hacer un getter de los tipos de cedulas por pais **/
     const [tipoDocs,setTipoDocs] = useState([])
     useState(()=>{
@@ -55,35 +27,8 @@ function useListarParametros(history){
         })
     },[])
 
-    const tipoDocsArbol = useMemo(()=> tipoDocs
-            .filter((td,index,array)=> index === array.findIndex(td2=>td2.codigo_pais === td.codigo_pais) )
-            .map(td=>({
-                title: td.codigo_pais,
-                value: 'PA_'+td.codigo_pais,
-                key: 'PA_'+td.codigo_pais,
-                children: tipoDocs
-                    .filter(td2 => td2.codigo_pais === td.codigo_pais)
-                    .map(td2=>({title: td2.codigo,value:'CO_'+td2.codigo,key:'CO_'+td2.codigo}))
-            }))
-        ,[tipoDocs]
-    )
-    const handleChangeGroup = (obj) =>{
-        const nuevoPush = { ...query, ...obj}
-        history.push({search:setStateToUrl(nuevoPush)})
-    }
     return {
         tipoDocs,
-        tipoDocsArbol,
-        data,
-        total,
-        perPage,
-        page,
-        loading,
-        telefonosPersonaId,
-        personalLoading,
-        handleChangeGroup,
-        personaModal,
-        documento,
     }
 }
 
@@ -116,20 +61,19 @@ function useExcel(){
                     /** Leemos la primera pagina*/
                     const sheet = workbook.getWorksheet(1)
                     /** Guardamos la fila de la cabecera (la primera fila)*/
-                    const cabezera = sheet.getRow(1).values.map((r,pos)=>({key:pos,value:(r.result) ?
+                    const cabezera = sheet.getRow(1).values.map((r,pos)=>({key:'i_'+pos,value:(r.result) ?
                         (r.result) :
                         (
                             (r instanceof Date) ?
                                 dateFormateado(r) :
                                 r
                         )})).filter(r=>r)
-                    console.log(cabezera)
                     /** Iteramos las filas restantes */
                     let contenido = []
                     sheet.eachRow((row,rowIndex) =>{
                         if(rowIndex !== 1){
                             contenido.push(row.values.reduce((acum,r,pos)=>
-                                Object.assign(acum, {[pos]:(r.result) ?
+                                Object.assign(acum, {['i_'+pos]:(r.result) ?
                                     (r.result) :
                                     (
                                         (r instanceof Date) ?
@@ -137,18 +81,6 @@ function useExcel(){
                                             r
                                     )})
                             ,{_position:rowIndex}))
-                            // const nuevo = row.values.filter(r=>r).map((r,pos)=>({
-                            //     key:pos,
-                            //     value: (r.result) ?
-                            //         (r.result) :
-                            //         (
-                            //             (r instanceof Date) ?
-                            //                 dateFormateado(r) :
-                            //                 r
-                            //         )
-                            // }))
-                            // nuevo.push({key:'_position', value: rowIndex})
-                            // contenido.push(nuevo)
                         }
                     })
                     console.log(contenido);
@@ -165,6 +97,13 @@ function useExcel(){
     },[archivos])
 
     const [enviandoDoc,setEnviandoDoc] = useState(false);
+    const [descargandoDoc,setDescargandoDoc] = useState(false);
+    const handleDownload = () => {
+        setDescargandoDoc(true);
+        exportExcel('fuente-unica',contenidoExcel,columns)
+            .catch(e=>openNotification(e))
+            .finally(()=>setDescargandoDoc(false))
+    }
     const handleSendDoc = () =>{
         setEnviandoDoc(true);
         axios({
@@ -174,7 +113,6 @@ function useExcel(){
                 tipo_doc_id:tipoDoc
             }
         }).then(({data})=>{
-            console.log(data)
             let cantidadTelefono = 0;       //para saber cuantas columnas ir agregandole (maximo 10)
             const nuevoValores = contenidoExcel.map(ce=>{
                 const valorBase = data.personas.find(p=>p.doc === (''+ce[columnaDocumento]))
@@ -208,6 +146,19 @@ function useExcel(){
         }).finally(()=>setEnviandoDoc(false))
     }
 
+    const columns = (columnasExcelAdicional.map((c,index)=>({
+        title: <b style={{backgroundColor:'ff'}}>{c.value}</b>,
+        dataIndex: c.key,
+        key: c.key,
+        fixed:index === 0?'left':undefined,
+        // render: item => <p>{item.id}</p>
+    }))).concat(columnasExcel.map(c=>({
+        title: c.value,
+        dataIndex: c.key,
+        key: c.key,
+        // render: item => <p>{item.id}</p>
+    })));
+
     return {
         archivos,
         setArchivos,
@@ -221,30 +172,17 @@ function useExcel(){
         enviandoDoc,
         tipoDoc,
         setTipoDoc,
+        handleDownload,
+        descargandoDoc,
+        columns,
     }
 }
 
-const columnasTelefono = [
-    {
-        title: 'Telefono',
-        dataIndex: 'telefono',
-        key: 'telefono',
-    },
-    {
-        title: 'Origen',
-        dataIndex: ['origen','origen'],
-        key: 'origen.codigo',
-    },
-]
 
-export default function Exportar({history}) {
+export default function Exportar() {
     const {
-        handleChangeGroup,
-        telefonosPersonaId,
-        personaModal,
-        personalLoading,
         tipoDocs,
-    } = useListarParametros(history);
+    } = useListarParametros();
     const {
         archivos,
         setArchivos,
@@ -255,23 +193,20 @@ export default function Exportar({history}) {
         contenidoExcel,
         loading,
         handleSendDoc,
+        handleDownload,
         enviandoDoc,
         setTipoDoc,
         tipoDoc,
+        descargandoDoc,
+        columns,
     } = useExcel();
 
-    const columns = columnasExcel.concat(columnasExcelAdicional).map(c=>({
-            title: c.value,
-            dataIndex: c.key,
-            key: c.key,
-            // render: item => <p>{item.id}</p>
-    }));
     return <>
         <Divider>Entrada</Divider>
         <Row justify="space-around">
             <Col span={5}>
                 <Upload
-                    onRemove={file=>{
+                    onRemove={()=>{
                         setArchivos([])
                     }}
                     beforeUpload={file=>{
@@ -320,7 +255,10 @@ export default function Exportar({history}) {
                 </Select>
             </Col>
             <Col span={5}>
-                <Button disabled={!columnaDocumento || !tipoDoc} onClick={handleSendDoc}>Procesar</Button>
+                { (columnasExcelAdicional.length === 0)
+                    ? <Button disabled={!columnaDocumento || !tipoDoc || enviandoDoc} onClick={handleSendDoc}>Procesar</Button>
+                    : <Button type="primary" icon={<DownloadOutlined />} onClick={handleDownload} disabled={descargandoDoc}>Descargar</Button>
+                }
             </Col>
         </Row>
         <Divider>Resultados</Divider>
@@ -329,28 +267,10 @@ export default function Exportar({history}) {
             dataSource={contenidoExcel}
             rowKey="_position"
             loading={loading || enviandoDoc}
+            scroll={{x:1300, /*y:800*/}}
             pagination={{
                 showSizeChanger:true,
             }}
         />
-
-        <Modal
-            title={`Telefonos de ${personaModal?.nombre}`}
-            centered
-            visible={!!telefonosPersonaId}
-            onOk={() => handleChangeGroup({telefonosPersonaId:0})}
-            onCancel={() => handleChangeGroup({telefonosPersonaId:0})}
-        >
-            <Table
-                columns={columnasTelefono}
-                dataSource={personaModal?.telefonos || []}
-                rowKey="id"
-                loading={personalLoading}
-                pagination={{
-                    showSizeChanger:true,
-                    // total:total
-                }}
-            />
-        </Modal>
     </>
 }

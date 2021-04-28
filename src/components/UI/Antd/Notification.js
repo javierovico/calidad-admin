@@ -3,6 +3,7 @@ import React from "react";
 import { BsXOctagonFill } from 'react-icons/bs';
 
 const openNotification = (e,duracion = 30) => {
+    console.error(e)
     let titulo
     if(e?.titulo){
         titulo = e.titulo
@@ -10,6 +11,8 @@ const openNotification = (e,duracion = 30) => {
         titulo = e.response.data.message
     }else if(e?.response?.data?.exception){
         titulo = e.response.data.exception
+    }else if(e?.name){
+        titulo = e.name
     }else{
         titulo = 'Error'
     }
@@ -36,6 +39,8 @@ const openNotification = (e,duracion = 30) => {
                 </List.Item>
             )}
         />
+    }else if(e?.message){
+        contenido = <p>{e.message}</p>
     }else{
         contenido = 'Ocurrio un error'
     }
