@@ -57,7 +57,7 @@ function App() {
                     <Col span={8}>
                         {loggedIn && user && <Dropdown overlay={menuUsuario}>
                             <a href={'no'} className="ant-dropdown-link" onClick={e => e.preventDefault()} style={{float:'right'}}>
-                                {user.user}<AiFillCaretDown />
+                                {user.name}<AiFillCaretDown />
                             </a>
                         </Dropdown>}
                     </Col>

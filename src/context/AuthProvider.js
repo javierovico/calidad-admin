@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
-import User from '../modelos/User';
 import {ERROR_CODE_NO_AUTENTICADO} from "../settings/constant";
+import User from "../modelos/User";
 
 export const AuthContext = React.createContext();
 
@@ -81,6 +81,7 @@ const AuthProvider = props => {
             axios({
                 url: User.URL_DESCARGA + '?XDEBUG_SESSION_START=PHPSTORM'
             }).then(({data})=>{
+                console.log(new User(data))
                 setUser(new User(data))
             }).catch(()=>{
                 /** Fallo en el logueo*/

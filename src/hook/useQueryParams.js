@@ -42,6 +42,18 @@ export function getStateFromUrl(location) {
                             ? urlData[key].split(',')
                             : [];
                     break;
+                case 'listaQname':
+                    state[key] =
+                        urlData[key] && urlData[key] !== 'null'
+                            ? urlData[key].split(',')
+                            : [];
+                    break;
+                case 'rangoFecha':
+                    state[key] =
+                        urlData[key] && urlData[key] !== 'null'
+                            ? urlData[key].split(',')
+                            : [];
+                    break;
                 default:
                     state[key] = urlData[key];
                     break;
@@ -66,6 +78,20 @@ function reducer(state, action) {
                     [action.type]: action.payload
                 } :
                 state
+        case 'listaQname':
+            return ((state[action.type].length !== action.payload.length) || (state[action.type].some(i => !action.payload.find(i2 => i2 === i))))
+                ? {
+                    ...state,
+                    [action.type]: action.payload
+                } :
+                state
+        case 'rangoFecha':
+            return ((state[action.type][0] !== action.payload[0]) || (state[action.type][1] !== action.payload[1]))
+                ? {
+                    ...state,
+                    [action.type]: action.payload
+                } :
+                state
         default:
             throw new Error('anarako')
     }
@@ -79,7 +105,9 @@ export const useQueryParams = () => {
         perPage: parseInt(stateRaw.perPage) || 10,
         telefonosPersonaId: parseInt(stateRaw.telefonosPersonaId) || 0,
         listaTipoDoc: stateRaw.listaTipoDoc || [],
+        listaQname: stateRaw.listaQname || [],
         documento: stateRaw.documento || '',
+        rangoFecha: stateRaw.rangoFecha || [null,null],
     });
     /** escuchar cambios en departamentos */
     useEffect(() => {
@@ -95,8 +123,14 @@ export const useQueryParams = () => {
         dispatch({type: 'listaTipoDoc', payload: stateRaw.listaTipoDoc || []})
     }, [stateRaw.listaTipoDoc])
     useEffect(() => {
+        dispatch({type: 'listaQname', payload: stateRaw.listaQname || []})
+    }, [stateRaw.listaQname])
+    useEffect(() => {
         dispatch({type: 'documento', payload: stateRaw.documento || ''})
     }, [stateRaw.documento])
+    useEffect(() => {
+        dispatch({type: 'rangoFecha', payload: stateRaw.rangoFecha || [null,null]})
+    }, [stateRaw.rangoFecha])
     return state
 }
 
@@ -119,8 +153,15 @@ export function setStateToUrl(state) {
                     urlData[key] =
                         state[key] && state[key].length ? state[key].join(',') : null;
                     break;
+                case 'listaQname':
+                    urlData[key] =
+                        state[key] && state[key].length ? state[key].join(',') : null;
+                    break;
                 case 'documento':
                     urlData[key] = state[key]? state[key] : null;
+                    break;
+                case 'rangoFecha':
+                    urlData[key] = (state[key][0] === null || state[key][1] === null)? state[key].join(',') : null;
                     break;
                 default:
                     urlData[key] = state[key];

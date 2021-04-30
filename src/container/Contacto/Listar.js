@@ -1,18 +1,21 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
 import { setStateToUrl, useQueryParams} from "../../hook/useQueryParams";
-import {Input,Col, Divider, Modal, Row, Table, TreeSelect} from 'antd';
+import {Input,Col, Divider, Modal, Row, Table, TreeSelect,DatePicker, Space } from 'antd';
 import axios from "axios";
 import Contacto from "../../modelos/FuenteUnicaContactos/Contacto";
 import openNotification from "../../components/UI/Antd/Notification";
 import {AuthContext} from "../../context/AuthProvider";
 import TipoDocumento from "../../modelos/FuenteUnicaContactos/TipoDocumento";
+import locale from 'antd/es/date-picker/locale/es_ES';
+import QueueStat from "../../modelos/Calidad/QueueStat";
+import Setup from "../../modelos/Calidad/Setup";
 
 const {Search} = Input;
 
 function useListarParametros(history){
     const {analizarError} = useContext(AuthContext)
     const query = useQueryParams()
-    const {page,perPage,telefonosPersonaId,listaTipoDoc,documento} = query
+    const {page,perPage,telefonosPersonaId,listaQname,documento,rangoFecha} = query
     const [data,setData] = useState([]);
     const [total,setTotal] = useState(1);
     const [loading,setLoading] = useState(true);
@@ -20,13 +23,12 @@ function useListarParametros(history){
         let cancelar = false;
         setLoading(true);
         axios({
-            url: Contacto.URL_DESCARGA + '?XDEBUG_SESSION_START=PHPSTORM',
+            url: QueueStat.URL_DESCARGA + '?XDEBUG_SESSION_START=PHPSTORM',
             params:{
-                with:['tipoDocumento'],
-                withCount:['telefonos'],
+                with:['recordings'],
                 page,
                 perPage,
-                listaTipoDoc,
+                listaQname,
                 documento,
             }
         }).then(({data})=>{
@@ -43,37 +45,14 @@ function useListarParametros(history){
         return ()=>{
             cancelar = true;
         }
-    },[page,perPage,listaTipoDoc,documento,analizarError])
-    const [personaModal,setPersonaModal] = useState(null)
-    const [personalLoading,setPersonalLoading] = useState(false);
-    useEffect(()=>{
-        let cancelar = false;
-        if(!telefonosPersonaId){
-            setPersonalLoading(false);
-            return () => cancelar = true;
-        }
-        setPersonalLoading(true);
-        axios({
-            url: Contacto.urlCargaFromId(telefonosPersonaId)
-        }).then(({data}) => {
-            if(!cancelar){
-                setPersonaModal(new Contacto(data.contacto))
-            }
-        }).catch(e=> {
-            if(!cancelar){
-                analizarError(e)
-                openNotification(e)
-            }
-        }).finally(()=>setPersonalLoading(false))
-        return () => cancelar = true;
-    },[telefonosPersonaId,analizarError])
+    },[page,perPage,listaQname,documento,analizarError])
     /** Zona para hacer un getter de los tipos de cedulas por pais **/
     const [tipoDocs,setTipoDocs] = useState([])
     useState(()=>{
         axios({
-            url:TipoDocumento.URL_DESCARGA
+            url:Setup.URL_DESCARGA
         }).then(({data})=>{
-            setTipoDocs(data.data.map(d=>new TipoDocumento(d)))
+            setTipoDocs(data.data.map(d=>new Setup(d)))
         }).catch(e=>{
             setTipoDocs([])
             analizarError(e)
@@ -99,7 +78,7 @@ function useListarParametros(history){
     }
     return {
         tipoDocs,
-        listaTipoDoc,
+        listaQname,
         tipoDocsArbol,
         data,
         total,
@@ -107,9 +86,7 @@ function useListarParametros(history){
         page,
         loading,
         telefonosPersonaId,
-        personalLoading,
         handleChangeGroup,
-        personaModal,
         documento,
     }
 }
@@ -140,7 +117,7 @@ export default function Listar({history}) {
         telefonosPersonaId,
         personaModal,
         personalLoading,
-        listaTipoDoc,
+        listaQname,
         documento,
     } = useListarParametros(history);
 
@@ -187,24 +164,13 @@ export default function Listar({history}) {
             </a>
         },
     ];
-    const tProps = {
-        treeData: tipoDocsArbol,
-        value: listaTipoDoc,
-        onChange: (value)=>{
-            handleChangeGroup({listaTipoDoc:value,page:1})
-        },
-        treeCheckable: true,
-        showCheckedStrategy: 'SHOW_PARENT',
-        placeholder: 'Seleccione tipo de documento',
-        style: {
-            width: '100%',
-        },
-    };
     return <>
         <Divider>Filtrado</Divider>
         <Row justify="space-around">
             <Col span={10}>
-                <TreeSelect {...tProps} />
+                <Space direction="vertical" size={12}>
+                    <DatePicker.RangePicker locale={locale}/>
+                </Space>
             </Col>
             <Col span={10}>
                 <Search allowClear defaultValue={documento} placeholder="Documento"  enterButton onSearch={(value)=>{
@@ -231,24 +197,5 @@ export default function Listar({history}) {
                 },
                 total:total}}
         />
-
-        <Modal
-            title={`Telefonos de ${personaModal?.nombre}`}
-            centered
-            visible={!!telefonosPersonaId}
-            onOk={() => handleChangeGroup({telefonosPersonaId:0})}
-            onCancel={() => handleChangeGroup({telefonosPersonaId:0})}
-        >
-            <Table
-                columns={columnasTelefono}
-                dataSource={personaModal?.telefonos || []}
-                rowKey="id"
-                loading={personalLoading}
-                pagination={{
-                    showSizeChanger:true,
-                    // total:total
-                }}
-            />
-        </Modal>
     </>
 }

@@ -25,12 +25,12 @@ export const routes = [
         }),
     },
     {
-        nombre: 'Contactos',
-        link: '/contactos',
+        nombre: 'PBX',
+        link: '/pbx',
         hijos:[
             {
-                nombre:'Listar Contactos',
-                link:'/listar',
+                nombre:'Registro Llamadas',
+                link:'/llamadas',
                 component: loadable(() => import('./container/Contacto/Listar'), {
                     fallback: <Loading/>
                 }),
