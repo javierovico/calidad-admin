@@ -35,13 +35,6 @@ export const routes = [
                     fallback: <Loading/>
                 }),
             },
-            {
-                nombre:'Extraer Contactos Excel',
-                link:'/extraer-excel',
-                component: loadable(() => import('./container/Contacto/Exportar'), {
-                    fallback: <Loading/>
-                }),
-            }
         ]
     },
 ];
