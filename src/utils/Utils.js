@@ -43,9 +43,14 @@ export function getRandomColor() {
 
 
 
-export function dateFormateado(d){
+export function dateFormateado(d,conHora=true, segundos = false){
     d = new Date(d)
-    return d.getUTCFullYear() + "-" + ('0'+(d.getUTCMonth()+1)).substr(-2) + "-" + ('0'+d.getUTCDate()).substr(-2) + " " + ('0'+(d.getUTCHours())).substr(-2) + ":" + ('0'+d.getUTCMinutes()).substr(-2);
+    return d.getUTCFullYear() + "-" + ('0'+(d.getUTCMonth()+1)).substr(-2) + "-" + ('0'+d.getUTCDate()).substr(-2) + (conHora?(" " + ('0'+(d.getUTCHours())).substr(-2) + ":" + ('0'+d.getUTCMinutes()).substr(-2)):'') + (segundos?(":" + ('0'+(d.getUTCSeconds())).substr(-2)):(''));
+}
+
+export function dateFormateadoSinUTC(d,conHora=true, segundos = false){
+    d = new Date(d)
+    return d.getFullYear() + "-" + ('0'+(d.getMonth()+1)).substr(-2) + "-" + ('0'+d.getDate()).substr(-2) + (conHora?(" " + ('0'+(d.getHours())).substr(-2) + ":" + ('0'+d.getMinutes()).substr(-2)):'') + (segundos?(":" + ('0'+(d.getSeconds())).substr(-2)):(''));
 }
 
 export function horaFormateado(d){
@@ -236,4 +241,16 @@ export function setParams(obj){
         nuevo[key] = value
     )
     return (new URLSearchParams(nuevo).toString())
+}
+
+export function shuffleArray(array) {
+    let currentIndex = array.length, temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+    return array;
 }

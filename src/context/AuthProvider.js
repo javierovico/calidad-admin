@@ -81,7 +81,6 @@ const AuthProvider = props => {
             axios({
                 url: User.URL_DESCARGA + '?XDEBUG_SESSION_START=PHPSTORM'
             }).then(({data})=>{
-                console.log(new User(data))
                 setUser(new User(data))
             }).catch(()=>{
                 /** Fallo en el logueo*/

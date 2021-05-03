@@ -24,10 +24,10 @@ export default function exportExcel(titulo, datos, conversion){
             const row = worksheet.getRow(index+2)
             conversion.forEach(f=>{
                 let value
-                if(f.dataIndex){
+                if(f.render){
+                    value = resolverContenidoJSX(f.render(getDescendantPropArray(e,f.dataIndex),e))
+                }else if(f.dataIndex){
                     value = getDescendantPropArray(e,f.dataIndex)
-                }else if(f.render){
-                    value = resolverContenidoJSX(f.render(e))
                 }
                 row.getCell(f.key).value = value
             })
@@ -52,7 +52,8 @@ function resolverContenidoJSX(obj){
     }
 }
 
-function getDescendantPropArray(obj, arr) {
+function getDescendantPropArray(obj, arrIntacto) {
+    let arr = [...arrIntacto]
     if(!Array.isArray(arr)){
         arr = [arr]
     }

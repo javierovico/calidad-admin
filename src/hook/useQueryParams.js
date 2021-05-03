@@ -45,7 +45,7 @@ export function getStateFromUrl(location) {
                 case 'listaQname':
                     state[key] =
                         urlData[key] && urlData[key] !== 'null'
-                            ? urlData[key].split(',')
+                            ? urlData[key].split(',').map(r=>parseInt(r))
                             : [];
                     break;
                 case 'rangoFecha':
@@ -86,7 +86,7 @@ function reducer(state, action) {
                 } :
                 state
         case 'rangoFecha':
-            return ((state[action.type][0] !== action.payload[0]) || (state[action.type][1] !== action.payload[1]))
+            return ( (!Array.isArray(action.payload) || !Array.isArray(state[action.type])) || ((state[action.type][0] !== action.payload[0]) || (state[action.type][1] !== action.payload[1])))
                 ? {
                     ...state,
                     [action.type]: action.payload
@@ -107,7 +107,7 @@ export const useQueryParams = () => {
         listaTipoDoc: stateRaw.listaTipoDoc || [],
         listaQname: stateRaw.listaQname || [],
         documento: stateRaw.documento || '',
-        rangoFecha: stateRaw.rangoFecha || [null,null],
+        rangoFecha: stateRaw.rangoFecha || null,
     });
     /** escuchar cambios en departamentos */
     useEffect(() => {
@@ -129,7 +129,7 @@ export const useQueryParams = () => {
         dispatch({type: 'documento', payload: stateRaw.documento || ''})
     }, [stateRaw.documento])
     useEffect(() => {
-        dispatch({type: 'rangoFecha', payload: stateRaw.rangoFecha || [null,null]})
+        dispatch({type: 'rangoFecha', payload: stateRaw.rangoFecha || null})
     }, [stateRaw.rangoFecha])
     return state
 }
@@ -161,7 +161,7 @@ export function setStateToUrl(state) {
                     urlData[key] = state[key]? state[key] : null;
                     break;
                 case 'rangoFecha':
-                    urlData[key] = (state[key][0] === null || state[key][1] === null)? state[key].join(',') : null;
+                    urlData[key] = state[key]? state[key].join(',') : null;
                     break;
                 default:
                     urlData[key] = state[key];
